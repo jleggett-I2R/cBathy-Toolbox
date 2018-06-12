@@ -11,7 +11,7 @@ function bathy = bathyFromKAlpha(bathy)
 global CBATHYDoNotDeepWater
 
 
-OPTIONS = statset('nlinfit');   % nlinfit options
+%OPTIONS = statset('nlinfit');   % nlinfit options
 OPTIONS.MaxIter = 30;
 OPTIONS.TolX = 1e-10; %%%1e-3;l
 OPTIONS.Display = 'iter';

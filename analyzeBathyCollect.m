@@ -71,7 +71,8 @@ for xind = 1:length(bathy.xm)
             [fDep{yind},camUsed(yind)] = subBathyProcess( f, G, xyz, cam, ...
                 bathy.xm(xind), bathy.ym(yind), bathy.params, kappa );
         end
-    else  
+    else   
+       
         parfor yind = 1:length(bathy.ym)
             [fDep{yind},camUsed(yind)] = subBathyProcess( f, G, xyz, cam, ...
                 bathy.xm(xind), bathy.ym(yind), bathy.params, kappa );

@@ -41,7 +41,7 @@ minNeededPixels = 6;            % to avoid edge anomalies
 minLFraction = 0.5;             % min fract of wavelength to span
 maxAlphaOffset = pi/2;          % max radian distance from expected wave direction
 
-OPTIONS = statset('nlinfit');   % fit options
+%OPTIONS = statset('nlinfit');   % fit options
 OPTIONS.MaxIter = 50;
 OPTIONS.TolFun = 1e-6; %%%1e-3;
 
@@ -109,7 +109,7 @@ for i = 1:nKeep         % frequency loop
     LExpect = minLFraction*4*pi/(kmin+kmax);     % expected scale from mean k.
     LB_UB = [kmin; kmax];
     OPTIONS.TolX = min([kmin/1000,pi/180/1000]); % min([kmin/100,pi/180/10]);
-    statset(OPTIONS);
+    %statset(OPTIONS);
     warning off stats:nlinfit:IterationLimitExceeded
 
     % info for depth subsequent h error estimation

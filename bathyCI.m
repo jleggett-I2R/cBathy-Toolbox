@@ -37,7 +37,7 @@ if flag == 1 && ~isempty(ver('stats')) % use the stats toolbox if you have it
     % Calculate bathyError from t-stats.
     bathyErr = se * tinv(1-alpha/2,v);
     
-elseif flag || ~isempty(ver('stats')) % if you don't have the stats toolbox, or you don't want to use it
+elseif flag || isempty(ver('stats'))%~isempty(ver('stats')) % if you don't have the stats toolbox, or you don't want to use it
     
     rmse = norm(resid) / sqrt(v);
     se = rmse*sqrt(diag(inv(J)));

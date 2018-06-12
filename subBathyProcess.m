@@ -38,8 +38,9 @@ if isempty(subG)
 end
 
 %% now process!
-
 fDep = csmInvertKAlpha( f, subG, subXYZ, xm, ym, params, kappa );
+
+
 
 %% how simple!
 

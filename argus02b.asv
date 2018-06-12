@@ -5,6 +5,8 @@ params.dym = 25;                    % analysis domain spacing in y
 params.xyMinMax = [590 600 425 450];
 %[80 800 -500 1500];   % min, max of x, then y; original
 
+
+
                                     % default to [] for cBathy to choose
 params.tideFunction = 'cBathyTide';  % tide level function for evel
 

@@ -17,7 +17,7 @@ help cbathy-Toolbox
 
 %% set to production mode and process
 % First open the "settings" file argus02a.m in the editor and look at inputs
-edit argus02a
+edit argus02b
 
 % run the cBathyDemo
 democBathy
