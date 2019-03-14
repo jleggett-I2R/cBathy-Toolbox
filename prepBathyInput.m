@@ -43,7 +43,10 @@ f = [0: df: 1/(2*dt)-df];
 id = find((f >= (fB(1)-dfB/2)) & (f <= (fB(end)+dfB/2)));
 f = f(id);
 G = G(id,:);
-G = G./abs(G);  % scale spectral results to 1.
+
+% (removed for short records version, 10/08/17 holman)
+% G = G./abs(G);  % scale spectral results to 1.
+
 
 %% %%   2.  Define the analysis domain. 
 
@@ -78,6 +81,8 @@ Nym = length(ym);
 
 nanArray = nan(Nym, Nxm);
 fNanArray = nan([Nym, Nxm, params.nKeep]);
+
+bathy.camUsed = nanArray;
 
 bathy.fDependent.fB = fNanArray;
 bathy.fDependent.k = fNanArray;

@@ -38,7 +38,11 @@ end
 
 %% now process!
 
+warning off
+
 fDep = csmInvertKAlpha( f, subG, subXYZ, xm, ym, params, kappa );
+
+warning on
 
 %% how simple!
 

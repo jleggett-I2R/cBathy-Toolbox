@@ -4,7 +4,7 @@
 % demonstration for CIRN Boot Camp #1, 3/2017. It is designed to be stepped
 % through line by line while reading the comments.
 
-clear
+% clear
 
 % find the path to the cBathy Toolbox
 cBathyToolboxPath = what('cbathy-Toolbox');

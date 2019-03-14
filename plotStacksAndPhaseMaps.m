@@ -40,9 +40,9 @@ nCols = ceil(sqrt(nf));     % chose a reasonable number of rows and cols for dis
 nRows = ceil(nf/nCols);
 figure(11); set(gcf, 'name', 'Phase Maps'); clf;
 for i = 1:nf
-    ind = find(f<=fB(i),1,'last');
+    ind = find(abs(f-fB(i)) == min(abs(f-fB(i))));
     subplot(nRows, nCols, i); hold on
-    h=scatter3(xyz(:,1),xyz(:,2),angle(G(ind,:)),18,angle(G(ind,:)),'filled');
+    h=scatter3(xyz(:,1),xyz(:,2),angle(G(ind,:)),1,angle(G(ind,:)),'filled');
     xlabel('x (m)'); ylabel('y (m)'); axis equal, caxis([-pi pi]);
     axis ([ min(xyz(:,1)) max(xyz(:,1)) min(xyz(:,2)) max(xyz(:,2))]);
     view(2); title(['freq = ' num2str(fB(i),'%0.3g') ' Hz']); grid on

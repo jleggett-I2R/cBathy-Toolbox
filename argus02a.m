@@ -17,7 +17,8 @@ params.Ly = 2*params.dym;           %
 params.kappa0 = 2;                  % increase in smoothing at outer xm
 params.DECIMATE = 1;                % decimate pixels to reduce work load.
 params.maxNPix = 80;                % max num pixels per tile (decimate excess)
-
+params.shortLengthNFreqs = 4;       % need this many for coherence sorting
+ 
 % f-domain etc.
 params.fB = [1/18: 1/50: 1/4];		% frequencies for analysis (~40 dof)
 params.nKeep = 4;                   % number of frequencies to keep

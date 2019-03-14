@@ -47,36 +47,15 @@ Nxy = size(xyz,1);
 if Nxy<minNeededPixels          % too few points, bail out
     if( cBDebug( params ) )
         fprintf('Inadequate data to analyze tile, [x,y] = [%d, %d]\n', xm, ym)
-    end;
+    end
     fDependent.k = nan(1,params.nKeep);
     return
 end
 
-ri = [0:0.01:1]';       % create a hanning filter for later interp
+ri = (0:0.01:1)';       % create a hanning filter for later interp
 ai = (1 - cos( pi*(0.5 + 0.5*ri) ).^2);
 
-%%%% 2. find basic csm for all fB frequencies, sort by total coh^2 into preferred
-%%%% order and keep only nKeep frequencies
-fB = params.fB;
-nKeep = params.nKeep;
-for i = 1: length(fB)
-    id = find(abs(fB(i)-f) < (fB(2)-fB(1))/2);     % find the f's that match
-    % pull out the fft data and do the cross spectrum
-    C(:,:,i) = G(id,:)'*G(id,:) / length(id);   % pos 2nd leads 1st.
-end
-
-% create the coherence squared for all the potential frequence bands
-coh2 = squeeze(sum(sum(abs(C)))/(size(xyz,1)*(size(xyz,1)-1)));
-[~, coh2Sortid] = sort(coh2, 1, 'descend');  % sort by coh2
-fs = fB(coh2Sortid(1:nKeep));         % keep only the nKeep most coherent
-fDependent.fB = fs;
-C = C(:,:,coh2Sortid(1:nKeep));      % ditto
-
-% report frequencies we keep
-% formatStr = repmat('%.3f ', 1, nKeep);
-% fprintf(['Frequencies [' formatStr '] Hertz\n'], fs);
-
-%% %%  3. Find lags and weightings.  NOTE that we no longer rotate
+%%%% Find lags and weightings.  NOTE that we no longer rotate
 %% coordinates to a user cross-shore orientation.  The user is now
 %% responsible for providing cross-shore oriented coord system.
 
@@ -91,7 +70,50 @@ Wmi = interp1(ri,ai,r,'linear*',0);  % sample normalized weights
 maxDx = max(max(repmat(xy(:,1),1,Nxy) - repmat(xy(:,1)',Nxy,1)));
 maxDy = max(max(repmat(xy(:,2),1,Nxy) - repmat(xy(:,2)',Nxy,1)));
 
-% calculate the distance from every point to every other point
+%%%% 3. find basic csm for all fB frequencies, sort by total coh^2 into preferred
+%%%% order and keep only nKeep frequencies
+fB = params.fB;
+nKeep = params.nKeep;
+% if enough frequencies, do full coherence sorting.  If not, base
+% frequency selection on power in band.  First make sure you have at least
+% one f per band.
+fsPerBand = length(f)/length(fB);
+if (fsPerBand < 1)
+    warning(['Records too short! ' num2str(length(f)) ' f''s available but ' ...
+        num2str(length(fB)) ' requested.'])
+end
+if (fsPerBand >= params.shortLengthNFreqs)      % if lots of frequencies
+    G = G./abs(G);      % make unit magnitude
+    G(isnan(G))=0;
+    for i = 1: length(fB)
+        id = find(abs(fB(i)-f) < (fB(2)-fB(1))/2);     % find the f's that match
+        % pull out the fft data and do the cross spectrum
+        C(:,:,i) = G(id,:)'*G(id,:) / length(id);   % pos 2nd leads 1st.
+    end
+    % create the coherence squared for all the potential frequence bands
+    coh2 = squeeze(sum(sum(abs(C)))/(size(xyz,1)*(size(xyz,1)-1)));
+    [~, coh2SortID] = sort(coh2, 1, 'descend');  % sort by coh2
+    fs = fB(coh2SortID(1:nKeep));         % keep only the nKeep most coherent
+    fDependent.fB = fs;
+    C = C(:,:,coh2SortID(1:nKeep));      % ditto
+else
+    GWt = repmat(Wmi',length(f),1) .* abs(G);    % distance weight power
+    for i = 1: length(fB)
+        id = find(abs(fB(i)-f) < (fB(2)-fB(1))/2);     % find the f's that match
+        % pull out the fft data and find the mean mag
+        GBar(i) = sum(sum(GWt(id,:)));
+    end
+    [~, GBarSortID] = sort(GBar,2,'descend');
+    fs = fB(GBarSortID(1:nKeep));       % keep strongest signals
+    fDependent.fB = fs;
+    G = G./abs(G);      % make unit magnitude
+    G(isnan(G))=0;
+    for i = 1: length(fs)
+        id = find(abs(fs(i)-f) < (fB(2)-fB(1))/2);     % find the f's that match
+        % pull out the fft data and do the cross spectrum
+        C(:,:,i) = G(id,:)'*G(id,:) / length(id);   % pos 2nd leads 1st.
+    end
+end
 
 %% %%  4. loop through frequencies from most to least coherent.  For each
 %% f, find the csm, then the first EOF.  If sufficiently coherent, fit to
@@ -109,10 +131,11 @@ for i = 1:nKeep         % frequency loop
     OPTIONS.TolX = min([kmin/1000,pi/180/1000]); % min([kmin/100,pi/180/10]);
     statset(OPTIONS);
     warning off stats:nlinfit:IterationLimitExceeded
+    warning off stats:nlinfit:IllConditionedJacobian
 
     % info for depth subsequent h error estimation
     hiimax = 9.8*(1/fs(i)^2)/(2*pi)/2;  % deepest allowable = L0/2
-    hii = [params.MINDEPTH:.1:hiimax]'; % find k for full range of h
+    hii = (params.MINDEPTH:.1:hiimax)'; % find k for full range of h
     kii = dispsol(hii, fs(i),0);
 
     % pull out csm
@@ -139,7 +162,7 @@ for i = 1:nKeep         % frequency loop
             % check if outside acceptable limits
             if ((kAlphaPhi(1)<LB_UB(1,1)) || (kAlphaPhi(1)>LB_UB(2,1)) ...
                     || (kAlphaPhi(2)<LB_UB(1,2)) || (kAlphaPhi(2)>LB_UB(2,2)))
-                error;
+                error('kAlphaPhi out of bounds');
             end
             
             % get predictions then skill

@@ -16,6 +16,13 @@ function bathy = analyzeSingleBathyRunNotCIL(stackPnStr, stationStr)
 
 eval(stationStr)        % creates the params structure.
 load(stackPnStr)           % load xyz, t, data
+
+if ~exist('xyz','var')
+    xyz = XYZ;
+    t=T;
+    data=RAW;
+end
+
 bathy.epoch = num2str(t(1));
 bathy.sName = stackPnStr;
 bathy.params = params;
